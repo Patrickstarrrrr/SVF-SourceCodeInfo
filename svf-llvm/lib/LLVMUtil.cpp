@@ -466,7 +466,14 @@ const std::string LLVMUtil::getSourceLoc(const Value* val )
                 if (llvm::DbgDeclareInst *DDI = SVFUtil::dyn_cast<llvm::DbgDeclareInst>(DII))
                 {
                     llvm::DIVariable *DIVar = SVFUtil::cast<llvm::DIVariable>(DDI->getVariable());
-                    rawstr << "\"ln\": " << DIVar->getLine() << ", \"fl\": \"" << DIVar->getFilename().str() << "\"";
+                    llvm::DebugLoc DL = DDI->getDebugLoc();
+                    if (DL) {
+                        llvm::DILocation* Loc = DL.get();
+                        rawstr << "\"ln\": " << DIVar->getLine() << "\"cl\": " << Loc->getColumn() << ", \"fl\": \"" << DIVar->getFilename().str() << "\"";
+                    }
+                    else {
+                        rawstr << "\"ln\": " << DIVar->getLine() << ", \"fl\": \"" << DIVar->getFilename().str() << "\"";
+                    }
                     break;
                 }
             }
@@ -549,6 +556,241 @@ const std::string LLVMUtil::getSourceLoc(const Value* val )
     return rawstr.str();
 }
 
+const unsigned LLVMUtil::getSourceLine(const Value* val )
+{
+    if(val==nullptr)  return 0;
+
+    // std::string str;
+    // std::stringstream rawstr(str);
+    // rawstr << "{ ";
+
+    if (const Instruction* inst = SVFUtil::dyn_cast<Instruction>(val))
+    {
+        if (SVFUtil::isa<AllocaInst>(inst))
+        {
+            for (llvm::DbgInfoIntrinsic *DII : FindDbgDeclareUses(const_cast<Instruction*>(inst)))
+            {
+                if (llvm::DbgDeclareInst *DDI = SVFUtil::dyn_cast<llvm::DbgDeclareInst>(DII))
+                {
+                    llvm::DIVariable *DIVar = SVFUtil::cast<llvm::DIVariable>(DDI->getVariable());
+                    // llvm::DebugLoc DL = DDI->getDebugLoc();
+                    return DIVar->getLine();
+                    // if (DL) {
+                    //     // llvm::DILocation* Loc = DL.get();
+                    //     // rawstr << "\"ln\": " << DIVar->getLine() << "\"cl\": " << Loc->getColumn() << ", \"fl\": \"" << DIVar->getFilename().str() << "\"";
+                    //     // return Loc->getLine();
+                    //     return DIVar->getLine();
+                    // }
+                    // else {
+                    //     // rawstr << "\"ln\": " << DIVar->getLine() << ", \"fl\": \"" << DIVar->getFilename().str() << "\"";
+                    //     return DIVar->getLine();
+                    // }
+                    // break;
+                }
+            }
+        }
+        else if (MDNode *N = inst->getMetadata("dbg"))   // Here I is an LLVM instruction
+        {
+            llvm::DILocation* Loc = SVFUtil::cast<llvm::DILocation>(N);                   // DILocation is in DebugInfo.h
+            unsigned Line = Loc->getLine();
+            // unsigned Column = Loc->getColumn();
+            std::string File = Loc->getFilename().str();
+            //StringRef Dir = Loc.getDirectory();
+            if(File.empty() || Line == 0)
+            {
+                auto inlineLoc = Loc->getInlinedAt();
+                if(inlineLoc)
+                {
+                    Line = inlineLoc->getLine();
+                    // Column = inlineLoc->getColumn();
+                    // File = inlineLoc->getFilename().str();
+                }
+            }
+            return Line;
+        }
+    }
+    else if (const Argument* argument = SVFUtil::dyn_cast<Argument>(val))
+    {
+        // if (argument->getArgNo()%10 == 1)
+        //     // rawstr << argument->getArgNo() << "st";
+        // else if (argument->getArgNo()%10 == 2)
+        //     rawstr << argument->getArgNo() << "nd";
+        // else if (argument->getArgNo()%10 == 3)
+        //     rawstr << argument->getArgNo() << "rd";
+        // else
+        //     rawstr << argument->getArgNo() << "th";
+        // rawstr << " arg " << argument->getParent()->getName().str() << " "
+        //        << getSourceLocOfFunction(argument->getParent());
+
+        // return argument->getArgNo();
+        return getSourceLineOfFunction(argument->getParent());
+    }
+    else if (const GlobalVariable* gvar = SVFUtil::dyn_cast<GlobalVariable>(val))
+    {
+        // rawstr << "Glob ";
+        NamedMDNode* CU_Nodes = gvar->getParent()->getNamedMetadata("llvm.dbg.cu");
+        if(CU_Nodes)
+        {
+            for (unsigned i = 0, e = CU_Nodes->getNumOperands(); i != e; ++i)
+            {
+                llvm::DICompileUnit *CUNode = SVFUtil::cast<llvm::DICompileUnit>(CU_Nodes->getOperand(i));
+                for (llvm::DIGlobalVariableExpression *GV : CUNode->getGlobalVariables())
+                {
+                    llvm::DIGlobalVariable * DGV = GV->getVariable();
+
+                    if(DGV->getName() == gvar->getName())
+                    {
+                        // DGV->getColumn();
+                        // rawstr << "\"ln\": " << DGV->getLine() << ", \"fl\": \"" << DGV->getFilename().str() << "\"";
+                        return DGV->getLine();
+                    }
+
+                }
+            }
+        }
+    }
+    else if (const Function* func = SVFUtil::dyn_cast<Function>(val))
+    {
+        return getSourceLineOfFunction(func);
+    }
+    else if (const BasicBlock* bb = SVFUtil::dyn_cast<BasicBlock>(val))
+    {
+        // rawstr << "\"basic block\": " << bb->getName().str() << ", \"location\": " << getSourceLoc(bb->getFirstNonPHI());
+        return getSourceLine(bb->getFirstNonPHI());
+    }
+    else if(LLVMUtil::isConstDataOrAggData(val))
+    {
+        return 0;
+    }
+    else
+    {
+        return 0;
+    }
+    // rawstr << " }";
+
+    // if(rawstr.str()=="{  }")
+    //     return "";
+    // return rawstr.str();
+    return 0;
+}
+
+const unsigned LLVMUtil::getSourceColumn(const Value* val )
+{
+    if(val==nullptr)  return 0;
+
+    // std::string str;
+    // std::stringstream rawstr(str);
+    // rawstr << "{ ";
+
+    if (const Instruction* inst = SVFUtil::dyn_cast<Instruction>(val))
+    {
+        if (SVFUtil::isa<AllocaInst>(inst))
+        {
+            for (llvm::DbgInfoIntrinsic *DII : FindDbgDeclareUses(const_cast<Instruction*>(inst)))
+            {
+                if (llvm::DbgDeclareInst *DDI = SVFUtil::dyn_cast<llvm::DbgDeclareInst>(DII))
+                {
+                    // llvm::DIVariable *DIVar = SVFUtil::cast<llvm::DIVariable>(DDI->getVariable());
+                    llvm::DebugLoc DL = DDI->getDebugLoc();
+                    if (DL) {
+                        llvm::DILocation* Loc = DL.get();
+                        // rawstr << "\"ln\": " << DIVar->getLine() << "\"cl\": " << Loc->getColumn() << ", \"fl\": \"" << DIVar->getFilename().str() << "\"";
+                        return Loc->getColumn();
+                    }
+                    else {
+                        // rawstr << "\"ln\": " << DIVar->getLine() << ", \"fl\": \"" << DIVar->getFilename().str() << "\"";
+                        return 0;
+                    }
+                    // break;
+                }
+            }
+        }
+        else if (MDNode *N = inst->getMetadata("dbg"))   // Here I is an LLVM instruction
+        {
+            llvm::DILocation* Loc = SVFUtil::cast<llvm::DILocation>(N);                   // DILocation is in DebugInfo.h
+            unsigned Line = Loc->getLine();
+            unsigned Column = Loc->getColumn();
+            std::string File = Loc->getFilename().str();
+            //StringRef Dir = Loc.getDirectory();
+            if(File.empty() || Line == 0)
+            {
+                auto inlineLoc = Loc->getInlinedAt();
+                if(inlineLoc)
+                {
+                    Line = inlineLoc->getLine();
+                    Column = inlineLoc->getColumn();
+                    File = inlineLoc->getFilename().str();
+                }
+            }
+            return Column;
+        }
+    }
+    else if (const Argument* argument = SVFUtil::dyn_cast<Argument>(val))
+    {
+        // if (argument->getArgNo()%10 == 1)
+        //     // rawstr << argument->getArgNo() << "st";
+        // else if (argument->getArgNo()%10 == 2)
+        //     rawstr << argument->getArgNo() << "nd";
+        // else if (argument->getArgNo()%10 == 3)
+        //     rawstr << argument->getArgNo() << "rd";
+        // else
+        //     rawstr << argument->getArgNo() << "th";
+        // rawstr << " arg " << argument->getParent()->getName().str() << " "
+        //        << getSourceLocOfFunction(argument->getParent());
+
+        // return argument->getArgNo();
+        return getSourceColumnOfFunction(argument->getParent());
+    }
+    else if (const GlobalVariable* gvar = SVFUtil::dyn_cast<GlobalVariable>(val))
+    {
+        // rawstr << "Glob ";
+        // NamedMDNode* CU_Nodes = gvar->getParent()->getNamedMetadata("llvm.dbg.cu");
+        // if(CU_Nodes)
+        // {
+        //     for (unsigned i = 0, e = CU_Nodes->getNumOperands(); i != e; ++i)
+        //     {
+        //         llvm::DICompileUnit *CUNode = SVFUtil::cast<llvm::DICompileUnit>(CU_Nodes->getOperand(i));
+        //         for (llvm::DIGlobalVariableExpression *GV : CUNode->getGlobalVariables())
+        //         {
+        //             llvm::DIGlobalVariable * DGV = GV->getVariable();
+
+        //             if(DGV->getName() == gvar->getName())
+        //             {
+        //                 // DGV->getColumn();
+        //                 // rawstr << "\"ln\": " << DGV->getLine() << ", \"fl\": \"" << DGV->getFilename().str() << "\"";
+        //                 return DGV->getLine();
+        //             }
+
+        //         }
+        //     }
+        // }
+        return 0;
+    }
+    else if (const Function* func = SVFUtil::dyn_cast<Function>(val))
+    {
+        return getSourceColumnOfFunction(func);
+    }
+    else if (const BasicBlock* bb = SVFUtil::dyn_cast<BasicBlock>(val))
+    {
+        // rawstr << "\"basic block\": " << bb->getName().str() << ", \"location\": " << getSourceLoc(bb->getFirstNonPHI());
+        return getSourceColumn(bb->getFirstNonPHI());
+    }
+    else if(LLVMUtil::isConstDataOrAggData(val))
+    {
+        return 0;
+    }
+    else
+    {
+        return 0;
+    }
+    // rawstr << " }";
+
+    // if(rawstr.str()=="{  }")
+    //     return "";
+    // return rawstr.str();
+    return 0;
+}
+
 
 /*!
  * Get source code line number of a function according to debug info
@@ -567,6 +809,43 @@ const std::string LLVMUtil::getSourceLocOfFunction(const Function* F)
             rawstr << "\"ln\": " << SP->getLine() << ", \"file\": \"" << SP->getFilename().str() << "\"";
     }
     return rawstr.str();
+}
+const unsigned LLVMUtil::getSourceLineOfFunction(const Function* F)
+{
+    // std::string str;
+    // std::stringstream rawstr(str);
+    /*
+     * https://reviews.llvm.org/D18074?id=50385
+     * looks like the relevant
+     */
+    if (llvm::DISubprogram *SP =  F->getSubprogram())
+    {
+        if (SP->describes(F))
+            // rawstr << "\"ln\": " << SP->getLine() << ", \"file\": \"" << SP->getFilename().str() << "\"";
+            return SP->getLine();
+            
+    }
+    // return rawstr.str();
+    return 0;
+}
+const unsigned LLVMUtil::getSourceColumnOfFunction(const Function* F)
+{
+    // std::string str;
+    // std::stringstream rawstr(str);
+    /*
+     * https://reviews.llvm.org/D18074?id=50385
+     * looks like the relevant
+     */
+    if (llvm::DISubprogram *SP =  F->getSubprogram())
+    {
+        if (SP->describes(F))
+            // rawstr << "\"ln\": " << SP->getLine() << ", \"file\": \"" << SP->getFilename().str() << "\"";
+            // return SP->getColumn(); TODO;
+            return 0;
+            
+    }
+    // return rawstr.str();
+    return 0;
 }
 
 /// Get the next instructions following control flow

@@ -28,6 +28,8 @@
  */
 
 
+#include "Graphs/IRGraph.h"
+#include "Util/Casting.h"
 #include "Util/SVFUtil.h"
 #include "Graphs/SVFG.h"
 #include "Graphs/SVFGOPT.h"
@@ -758,6 +760,67 @@ const CallICFGNode* SVFG::isCallSiteRetSVFGNode(const SVFGNode* node) const
 void SVFG::performStat()
 {
     stat->performStat();
+}
+
+void SVFG::computeReachableNodesByID(NodeID id)
+{
+    if (reachableSet.test(id)) return;
+    reachableSet.set(id);
+    SVFGNode* node = getSVFGNode(id);
+    for (auto edge: node->getOutEdges())
+    {
+        NodeID dstID = edge->getDstID();
+        computeReachableNodesByID(dstID);
+    }
+}
+
+void SVFG::computeReachableNodesByIDForAllAddrs()
+{
+    std::cout << "Compute reachable nodes by ID for all addrs begin..." << std::endl;
+    for (auto n: *this) {
+        NodeID id = n.first;
+        SVFGNode* node = n.second;
+        if (SVFUtil::isa<AddrSVFGNode>(node)) {
+            computeReachableNodesByID(id);
+            reachableNodes[id] = reachableSet;
+            reachableSet.clear();
+        }
+    }
+    std::cout << "Compute reachable nodes by ID for all addrs end!" << std::endl;
+}
+
+void SVFG::collectNodeSourceInfo()
+{
+    std::cout << "Value-flow with source info: " << std::endl;
+    for (auto it = reachableNodes.begin(), eit = reachableNodes.end(); it != eit; ++it) {
+        NodeID id = it->first;
+        SVFGNode* addrSVFGNode = getSVFGNode(id);
+        AddrSVFGNode* addrNode = SVFUtil::dyn_cast<AddrSVFGNode>(addrSVFGNode);
+        NodeBS reachableSet = it->second;
+        const PAGNode* addrPAGNode = addrNode->getPAGDstNode();
+        unsigned addrLine = addrPAGNode->getSourceLine();
+        unsigned addrColumn = addrPAGNode->getSourceColumn();
+        std::cout << "(" << addrLine << "," << addrColumn << ") -> {";
+        int count = 0;
+        for (auto sid : reachableSet) {
+            SVFGNode* node = getSVFGNode(sid);
+
+            if (SVFUtil::isa<StoreSVFGNode>(node)) {
+                count ++;
+                StoreSVFGNode* storeNode = SVFUtil::dyn_cast<StoreSVFGNode>(node);
+                const PAGNode* dstNode = storeNode->getPAGDstNode();
+                unsigned line = dstNode->getSourceLine();
+                unsigned column = dstNode->getSourceColumn();
+                if (count == 1) {
+                    std::cout << " (" << line << "," << column << ")";
+                }
+                else {
+                    std::cout << ", (" << line << "," << column << ")";
+                }
+            }
+        }
+        std::cout << " }" << std::endl;
+    }
 }
 
 /*!

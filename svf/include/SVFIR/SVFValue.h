@@ -191,9 +191,29 @@ public:
         sourceLoc = sourceCodeInfo;
     }
 
+    inline virtual void setSourceLine(const unsigned sourceLineInfo)
+    {
+        sourceLine = sourceLineInfo;
+    }
+
+    inline virtual void setSourceColumn(const unsigned sourceColumnInfo)
+    {
+        sourceColumn = sourceColumnInfo;
+    }
+
     virtual const std::string getSourceLoc() const
     {
         return sourceLoc;
+    }
+
+    virtual const unsigned getSourceLine() const
+    {
+        return sourceLine;
+    }
+
+    virtual const unsigned getSourceColumn() const
+    {
+        return sourceColumn;
     }
 
     const std::string valueOnlyToString() const;
@@ -206,6 +226,8 @@ protected:
 
     std::string name;
     std::string sourceLoc;  ///< Source code information of this value
+    unsigned sourceLine;    ///< Source line number of this value
+    unsigned sourceColumn;  ///< Source column number of this value
 
     /// Helper functions to check node kinds
     //{@ Check node kind

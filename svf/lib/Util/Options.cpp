@@ -807,4 +807,10 @@ const Option<u32_t> Options::AEPrecision(
     0
 );
 
+const Option<bool> Options::SourceInfo(
+    "source-info",
+    "Compute and Print value-flow source info",
+    false
+);
+
 } // namespace SVF.

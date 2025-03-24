@@ -84,6 +84,12 @@ SVFG* SVFGBuilder::build(BVDataPTAImpl* pta, VFG::VFGK kind)
     if(Options::DumpVFG())
         svfg->dump("svfg_final");
 
+    if (Options::SourceInfo())
+    {
+        // TODO;
+        svfg->computeReachableNodesByIDForAllAddrs();
+        svfg->collectNodeSourceInfo();
+    }
     return svfg.get();
 }
 

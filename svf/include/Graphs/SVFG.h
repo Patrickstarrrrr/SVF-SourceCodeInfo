@@ -96,6 +96,13 @@ public:
     typedef MemSSA::CALLCHI CALLCHI;
     typedef MemSSA::CALLMU CALLMU;
 
+public:
+    NodeBS reachableSet;
+    Map<NodeID, NodeBS> reachableNodes;
+    void computeReachableNodesByID(NodeID id);
+    void computeReachableNodesByIDForAllAddrs();
+    void collectNodeSourceInfo();
+
 protected:
     MSSAVarToDefMapTy MSSAVarToDefMap;	///< map a memory SSA operator to its definition SVFG node
     CallSiteToActualINsMapTy callSiteToActualINMap;
