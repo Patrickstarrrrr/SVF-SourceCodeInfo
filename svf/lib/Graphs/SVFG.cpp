@@ -39,6 +39,7 @@
 #include "MemoryModel/PointerAnalysisImpl.h"
 #include <fstream>
 #include "Util/Options.h"
+#include "WPA/Andersen.h"
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -792,6 +793,7 @@ void SVFG::computeReachableNodesByIDForAllAddrs()
 void SVFG::collectNodeSourceInfo()
 {
     std::cout << "Value-flow with source info: " << std::endl;
+    AndersenWaveDiff* waveDiff = AndersenWaveDiff::createAndersenWaveDiff(pag);
     for (auto it = reachableNodes.begin(), eit = reachableNodes.end(); it != eit; ++it) {
         NodeID id = it->first;
         SVFGNode* addrSVFGNode = getSVFGNode(id);
@@ -800,23 +802,47 @@ void SVFG::collectNodeSourceInfo()
         const PAGNode* addrPAGNode = addrNode->getPAGDstNode();
         unsigned addrLine = addrPAGNode->getSourceLine();
         unsigned addrColumn = addrPAGNode->getSourceColumn();
-        std::cout << "(" << addrLine << "," << addrColumn << ") -> {";
+        std::string addrFile = addrPAGNode->getSourceFile();
+        std::cout << "(" << addrFile << "," << addrLine << "," << addrColumn << ") -> {";
         int count = 0;
         for (auto sid : reachableSet) {
             SVFGNode* node = getSVFGNode(sid);
 
             if (SVFUtil::isa<StoreSVFGNode>(node)) {
-                count ++;
+                // count ++;
                 StoreSVFGNode* storeNode = SVFUtil::dyn_cast<StoreSVFGNode>(node);
                 const PAGNode* dstNode = storeNode->getPAGDstNode();
                 unsigned line = dstNode->getSourceLine();
                 unsigned column = dstNode->getSourceColumn();
-                if (count == 1) {
-                    std::cout << " (" << line << "," << column << ")";
+                std::string file = dstNode->getSourceFile();
+                if (count == 0) {
+                    std::cout << " ("  << file << "," << line << "," << column << ")";
                 }
                 else {
-                    std::cout << ", (" << line << "," << column << ")";
+                    std::cout << ", (" << file << "," << line << "," << column << ")";
                 }
+                count++;
+                for (auto obj: waveDiff->getPts(dstNode->getId())) {
+                    const PAGNode* objNode = pag->getGNode(obj);
+                    unsigned objLine = objNode->getSourceLine();
+                    unsigned objColumn = objNode->getSourceColumn();
+                    std::string objFile = objNode->getSourceFile();
+                    std::cout << " (" << objFile << "," << objLine << "," << objColumn << ")";
+                }
+            }
+            else if (SVFUtil::isa<LoadSVFGNode>(node)) {
+                LoadSVFGNode* loadNode = SVFUtil::dyn_cast<LoadSVFGNode>(node);
+                const PAGNode* srcNode = loadNode->getPAGSrcNode();
+                unsigned line = srcNode->getSourceLine();
+                unsigned column = srcNode->getSourceColumn();
+                std::string file = srcNode->getSourceFile();
+                if (count == 0) {
+                    std::cout << " ("  << file << "," << line << "," << column << ")";
+                }
+                else {
+                    std::cout << ", (" << file << "," << line << "," << column << ")";
+                }
+                count++;
             }
         }
         std::cout << " }" << std::endl;

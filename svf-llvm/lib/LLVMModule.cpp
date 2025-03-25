@@ -1068,6 +1068,7 @@ void LLVMModuleSet::addToSVFVar2LLVMValueMap(const Value* val,
     svfBaseNode->setSourceLoc(LLVMUtil::getSourceLoc(val));
     svfBaseNode->setSourceLine(LLVMUtil::getSourceLine(val));
     svfBaseNode->setSourceColumn(LLVMUtil::getSourceColumn(val));
+    svfBaseNode->setSourceFile(LLVMUtil::getSourceFile(val));
     svfBaseNode->setName(val->getName().str());
 }
 

@@ -32,6 +32,7 @@
 
 #include "SVFIR/SVFType.h"
 #include "Graphs/GraphPrinter.h"
+#include <string>
 
 
 namespace SVF
@@ -201,6 +202,11 @@ public:
         sourceColumn = sourceColumnInfo;
     }
 
+    inline virtual void setSourceFile(const std::string& sourceFileInfo)
+    {
+        sourceFile = sourceFileInfo;
+    }
+    
     virtual const std::string getSourceLoc() const
     {
         return sourceLoc;
@@ -216,6 +222,11 @@ public:
         return sourceColumn;
     }
 
+    virtual const std::string getSourceFile() const
+    {
+        return sourceFile;
+    }
+
     const std::string valueOnlyToString() const;
 
 
@@ -228,6 +239,7 @@ protected:
     std::string sourceLoc;  ///< Source code information of this value
     unsigned sourceLine;    ///< Source line number of this value
     unsigned sourceColumn;  ///< Source column number of this value
+    std::string sourceFile; ///< Source file of this value
 
     /// Helper functions to check node kinds
     //{@ Check node kind

@@ -346,9 +346,11 @@ void processArguments(int argc, char** argv, int& arg_num, char** arg_value,
 const std::string getSourceLoc(const Value* val);
 const unsigned getSourceLine(const Value* val);
 const unsigned getSourceColumn(const Value* val);
+const std::string getSourceFile(const Value* val);
 const std::string getSourceLocOfFunction(const Function* F);
 const unsigned getSourceLineOfFunction(const Function* F);
 const unsigned getSourceColumnOfFunction(const Function* F);
+const std::string getSourceFileOfFunction(const Function* F);
 
 bool isIntrinsicInst(const Instruction* inst);
 bool isIntrinsicFun(const Function* func);

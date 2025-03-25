@@ -1,0 +1,313 @@
+
+*********General Stats***************
+################ (program : example3.bc)###############
+AddrsNum            8
+BBWith2Succ         0
+BBWith3Succ         0
+CallsNum            0
+ConstArrayObj       0
+ConstStructObj      0
+ConstantObj         0
+CopysNum            1
+FIObjNum            0
+FSObjNum            7
+FunctionObjs        2
+GepsNum             0
+GlobalObjs          0
+HeapObjs            1
+IndCallSites        0
+LoadsNum            2
+MaxStructSize       0
+NonPtrObj           5
+ReturnsNum          0
+StackObjs           4
+StoresNum           3
+TotalCallSite       0
+TotalFieldObjects   0
+TotalObjects        8
+TotalPTASVFStmts    10
+TotalPointers       25
+TotalSVFStmts       15
+VarArrayObj         0
+VarStructObj        0
+----------------Time and memory stats--------------------
+LLVMIRTime          0.006
+SVFIRTime           0
+SymbolTableTime     0
+#######################################################
+
+*********PTACallGraph Stats (Andersen analysis)***************
+################ (program : example3.bc)###############
+----------------Numbers stats----------------------------
+CalRetPairInCycle   0
+MaxNodeInCycle      0
+NodeInCycle         0
+TotalCycle          0
+TotalEdge           0
+TotalNode           2
+#######################################################
+
+*********Andersen Pointer Analysis Stats***************
+################ (program : example3.bc)###############
+----------------Time and memory stats--------------------
+AvgIn/OutAddrEdge   0.4
+AvgIn/OutCopyEdge   0.266667
+AvgIn/OutEdge       0.866667
+AvgIn/OutLoadEdge   0.0666667
+AvgIn/OutStoreEdge  0.133333
+AvgPtsSetSize       0.272727
+AvgTopLvlPtsSize    0.875
+CollapseTime        0
+CopyGepTime         0
+LoadStoreTime       0
+MemoryUsageVmrss    0
+MemoryUsageVmsize   0
+SCCDetectTime       0
+SCCMergeTime        0
+TotalTime           0
+UpdateCGTime        0
+----------------Numbers stats----------------------------
+AddrProcessed       6
+CopyProcessed       3
+DummyFieldPtrs      0
+FieldObjs           0
+GepProcessed        0
+IndCallSites        0
+IndEdgeSolved       0
+LoadProcessed       1
+LocalVarInRecur     0
+MaxInAddrEdge       1
+MaxInCopyEdge       1
+MaxInLoadEdge       1
+MaxInStoreEdge      1
+MaxNodesInSCC       0
+MaxOutAddrEdge      1
+MaxOutCopyEdge      1
+MaxOutLoadEdge      1
+MaxOutStoreEdge     1
+MaxPtsSetSize       1
+MemObjects          8
+NodesInCycles       0
+NullPointer         0
+NumOfAddrs          6
+NumOfCGEdge         7
+NumOfCGNode         17
+NumOfCopys          4
+NumOfFieldExpand    0
+NumOfGeps           0
+NumOfLoads          1
+NumOfSCCDetect      2
+NumOfSFRs           0
+NumOfStores         2
+NumOfValidNode      15
+NumOfValidObjNode   6
+Pointers            25
+PointsToBlkPtr      0
+PointsToConstPtr    0
+SolveIterations     2
+StoreProcessed      2
+TotalCycleNum       0
+TotalObjects        8
+TotalPWCCycleNum    0
+TotalPointers       25
+#######################################################
+
+****Persistent Points-To Cache Statistics: Andersen's analysis bitvector****
+################ (program : example3.bc)###############
+UniquePointsToSets       7
+TotalUnions              9
+PropertyUnions           9
+UniqueUnions             0
+LookupUnions             0
+PreemptiveUnions         0
+TotalComplements         34
+PropertyComplements      34
+UniqueComplements        0
+LookupComplements        0
+PreemptiveComplements    0
+TotalIntersections       3
+PropertyIntersections    3
+UniqueIntersections      0
+LookupIntersections      0
+PreemptiveIntersections  0
+#######################################################
+
+*********Memory SSA Statistics***************
+################ (program : example3.bc)###############
+----------------Time and memory stats--------------------
+AverageRegSize      1
+GenMUCHITime        0
+GenRegionTime       0
+InsertPHITime       0
+SSARenameTime       0
+TotalMSSATime       0
+----------------Numbers stats----------------------------
+BBHasMSSAPhi        0
+CSChiNode           0
+CSHasChi            0
+CSHasMu             0
+CSMuNode            0
+FunEntryChi         4
+FunHasEntryChi      1
+FunHasRetMu         1
+FunRetMu            4
+LoadHasMu           2
+LoadMuNode          2
+MSSAPhi             0
+MaxRegSize          1
+MemRegions          4
+StoreChiNode        3
+StoreHasChi         3
+#######################################################
+
+*********SVFG Statistics***************
+################ (program : example3.bc)###############
+----------------Time and memory stats--------------------
+ATNodeTime          0
+AvgWeight           1
+ConnDirEdgeTime     0
+ConnIndEdgeTime     0
+OptTime             0
+TLNodeTime          0
+TotalTime           0
+----------------Numbers stats----------------------------
+ActualIn            0
+ActualOut           0
+ActualParam         0
+ActualRet           0
+Addr                8
+AvgInDegree         0
+AvgIndInDeg         1
+AvgIndOutDeg        1
+AvgOutDegree        0
+Copy                1
+DirectCallEdge      0
+DirectEdge          10
+DirectRetEdge       0
+FormalIn            4
+FormalOut           4
+FormalParam         0
+FormalRet           1
+Gep                 0
+IndCallEdge         0
+IndRetEdge          0
+IndirectEdge        9
+IndirectEdgeLabels  9
+Load                2
+MSSAPhi             0
+MaxInDegree         3
+MaxIndInDeg         1
+MaxIndOutDeg        2
+MaxOutDegree        2
+PHI                 1
+Store               3
+TotalEdge           19
+TotalNode           25
+#######################################################
+Writing 'svfg_final.dot'...Compute reachable nodes by ID for all addrs begin...
+Compute reachable nodes by ID for all addrs end!
+Value-flow with source info: 
+
+*********PTACallGraph Stats (Andersen analysis)***************
+################ (program : example3.bc)###############
+----------------Numbers stats----------------------------
+CalRetPairInCycle   0
+MaxNodeInCycle      0
+NodeInCycle         0
+TotalCycle          0
+TotalEdge           0
+TotalNode           2
+#######################################################
+
+*********Andersen Pointer Analysis Stats***************
+################ (program : example3.bc)###############
+----------------Time and memory stats--------------------
+AvgIn/OutAddrEdge   0.4
+AvgIn/OutCopyEdge   0.266667
+AvgIn/OutEdge       0.866667
+AvgIn/OutLoadEdge   0.0666667
+AvgIn/OutStoreEdge  0.133333
+AvgPtsSetSize       0.272727
+AvgTopLvlPtsSize    0.875
+CollapseTime        0
+CopyGepTime         0
+LoadStoreTime       0
+MemoryUsageVmrss    0
+MemoryUsageVmsize   0
+SCCDetectTime       0
+SCCMergeTime        0
+TotalTime           0
+UpdateCGTime        0
+----------------Numbers stats----------------------------
+AddrProcessed       12
+CopyProcessed       6
+DummyFieldPtrs      0
+FieldObjs           0
+GepProcessed        0
+IndCallSites        0
+IndEdgeSolved       0
+LoadProcessed       2
+LocalVarInRecur     0
+MaxInAddrEdge       1
+MaxInCopyEdge       1
+MaxInLoadEdge       1
+MaxInStoreEdge      1
+MaxNodesInSCC       0
+MaxOutAddrEdge      1
+MaxOutCopyEdge      1
+MaxOutLoadEdge      1
+MaxOutStoreEdge     1
+MaxPtsSetSize       1
+MemObjects          8
+NodesInCycles       0
+NullPointer         0
+NumOfAddrs          6
+NumOfCGEdge         7
+NumOfCGNode         17
+NumOfCopys          4
+NumOfFieldExpand    0
+NumOfGeps           0
+NumOfLoads          1
+NumOfSCCDetect      4
+NumOfSFRs           0
+NumOfStores         2
+NumOfValidNode      15
+NumOfValidObjNode   6
+Pointers            25
+PointsToBlkPtr      0
+PointsToConstPtr    0
+SolveIterations     2
+StoreProcessed      4
+TotalCycleNum       0
+TotalObjects        8
+TotalPWCCycleNum    0
+TotalPointers       25
+#######################################################
+
+****Persistent Points-To Cache Statistics: Andersen's analysis bitvector****
+################ (program : example3.bc)###############
+UniquePointsToSets       7
+TotalUnions              9
+PropertyUnions           9
+UniqueUnions             0
+LookupUnions             0
+PreemptiveUnions         0
+TotalComplements         34
+PropertyComplements      34
+UniqueComplements        0
+LookupComplements        0
+PreemptiveComplements    0
+TotalIntersections       3
+PropertyIntersections    3
+UniqueIntersections      0
+LookupIntersections      0
+PreemptiveIntersections  0
+#######################################################
+(-,0,0) -> { }
+(example3.c,6,9) -> { (example3.c,4,10), (example3.c,4,10) (example3.c,4,10), (example3.c,9,6) (example3.c,6,9) }
+(example3.c,5,9) -> { (example3.c,5,9), (example3.c,3,10) (example3.c,3,10), (example3.c,9,6) (example3.c,6,9) }
+(example3.c,4,10) -> { (example3.c,4,10), (example3.c,4,10) (example3.c,4,10), (example3.c,9,6) (example3.c,6,9) }
+(example3.c,3,10) -> { (example3.c,3,10) (example3.c,3,10) }
+(example3.c,1,0) -> { }
+(-,0,0) -> { }
+(-,0,0) -> { }

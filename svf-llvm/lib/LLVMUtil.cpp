@@ -449,6 +449,113 @@ const Value* LLVMUtil::getGlobalRep(const Value* val)
 /*!
  * Get the meta data (line number and file name) info of a LLVM value
  */
+ const std::string LLVMUtil::getSourceFile(const Value* val )
+ {
+     if(val==nullptr)  return "-";
+ 
+    //  std::string str;
+    //  std::stringstream rawstr(str);
+ 
+     if (const Instruction* inst = SVFUtil::dyn_cast<Instruction>(val))
+     {
+         if (SVFUtil::isa<AllocaInst>(inst))
+         {
+             for (llvm::DbgInfoIntrinsic *DII : FindDbgDeclareUses(const_cast<Instruction*>(inst)))
+             {
+                 if (llvm::DbgDeclareInst *DDI = SVFUtil::dyn_cast<llvm::DbgDeclareInst>(DII))
+                 {
+                     llvm::DIVariable *DIVar = SVFUtil::cast<llvm::DIVariable>(DDI->getVariable());
+                    //  llvm::DebugLoc DL = DDI->getDebugLoc();
+                     return DIVar->getFilename().str();
+                 }
+             }
+         }
+         else if (MDNode *N = inst->getMetadata("dbg"))   // Here I is an LLVM instruction
+         {
+             llvm::DILocation* Loc = SVFUtil::cast<llvm::DILocation>(N);                   // DILocation is in DebugInfo.h
+             unsigned Line = Loc->getLine();
+            //  unsigned Column = Loc->getColumn();
+             std::string File = Loc->getFilename().str();
+             //StringRef Dir = Loc.getDirectory();
+             if(File.empty() || Line == 0)
+             {
+                 auto inlineLoc = Loc->getInlinedAt();
+                 if(inlineLoc)
+                 {
+                     Line = inlineLoc->getLine();
+                    //  Column = inlineLoc->getColumn();
+                     File = inlineLoc->getFilename().str();
+                 }
+             }
+             return File;
+            //  rawstr << "\"ln\": " << Line << ", \"cl\": " << Column << ", \"fl\": \"" << File << "\"";
+         }
+     }
+     else if (const Argument* argument = SVFUtil::dyn_cast<Argument>(val))
+     {
+        //  if (argument->getArgNo()%10 == 1)
+        //      rawstr << argument->getArgNo() << "st";
+        //  else if (argument->getArgNo()%10 == 2)
+        //      rawstr << argument->getArgNo() << "nd";
+        //  else if (argument->getArgNo()%10 == 3)
+        //      rawstr << argument->getArgNo() << "rd";
+        //  else
+        //      rawstr << argument->getArgNo() << "th";
+        //  rawstr << " arg " << argument->getParent()->getName().str() << " "
+        //         << getSourceLocOfFunction(argument->getParent());
+        return getSourceFileOfFunction(argument->getParent());
+     }
+     else if (const GlobalVariable* gvar = SVFUtil::dyn_cast<GlobalVariable>(val))
+     {
+        //  rawstr << "Glob ";
+         NamedMDNode* CU_Nodes = gvar->getParent()->getNamedMetadata("llvm.dbg.cu");
+         if(CU_Nodes)
+         {
+             for (unsigned i = 0, e = CU_Nodes->getNumOperands(); i != e; ++i)
+             {
+                 llvm::DICompileUnit *CUNode = SVFUtil::cast<llvm::DICompileUnit>(CU_Nodes->getOperand(i));
+                 for (llvm::DIGlobalVariableExpression *GV : CUNode->getGlobalVariables())
+                 {
+                     llvm::DIGlobalVariable * DGV = GV->getVariable();
+ 
+                     if(DGV->getName() == gvar->getName())
+                     {
+                        //  rawstr << "\"ln\": " << DGV->getLine() << ", \"fl\": \"" << DGV->getFilename().str() << "\"";
+                         return DGV->getFilename().str();
+                     }
+ 
+                 }
+             }
+         }
+     }
+     else if (const Function* func = SVFUtil::dyn_cast<Function>(val))
+     {
+        //  rawstr << getSourceFileOfFunction(func);
+        return getSourceFileOfFunction(func);
+     }
+     else if (const BasicBlock* bb = SVFUtil::dyn_cast<BasicBlock>(val))
+     {
+        return getSourceFile(bb->getFirstNonPHI());
+     }
+     else if(LLVMUtil::isConstDataOrAggData(val))
+     {
+        return "-";
+     }
+     else
+     {
+        return "-";
+     }
+    //  rawstr << " }";
+ 
+    //  if(rawstr.str()=="{  }")
+    //      return "";
+    //  return rawstr.str();
+    return "-";
+ }
+
+/*!
+ * Get the meta data (line number and file name) info of a LLVM value
+ */
 const std::string LLVMUtil::getSourceLoc(const Value* val )
 {
     if(val==nullptr)  return "{ empty val }";
@@ -846,6 +953,21 @@ const unsigned LLVMUtil::getSourceColumnOfFunction(const Function* F)
     }
     // return rawstr.str();
     return 0;
+}
+const std::string LLVMUtil::getSourceFileOfFunction(const Function* F)
+{
+    // std::string str;
+    // std::stringstream rawstr(str);
+    /*
+     * https://reviews.llvm.org/D18074?id=50385
+     * looks like the relevant
+     */
+    if (llvm::DISubprogram *SP =  F->getSubprogram())
+    {
+        if (SP->describes(F))
+            return SP->getFilename().str();
+    }
+    return "-";
 }
 
 /// Get the next instructions following control flow
