@@ -296,12 +296,13 @@ BUILD_DIR="./${BUILD_TYPE}-build"
 rm -rf "${BUILD_DIR}"
 mkdir "${BUILD_DIR}"
 # If you need shared libs, turn BUILD_SHARED_LIBS on
-cmake -D CMAKE_BUILD_TYPE:STRING="${BUILD_TYPE}"   \
-    -DCMAKE_CXX_FLAGS="-Wno-error" \
-    -DSVF_ENABLE_ASSERTIONS:BOOL=true              \
-    -DSVF_SANITIZE="${SVF_SANITIZER}"              \
-    -DBUILD_SHARED_LIBS=${BUILD_DYN_LIB}            \
-    -S "${SVFHOME}" -B "${BUILD_DIR}"
+cmake -D CMAKE_BUILD_TYPE:STRING="${BUILD_TYPE}" \
+      -DCMAKE_CXX_FLAGS="-Wno-error" \
+      -DSVF_ENABLE_ASSERTIONS:BOOL=true \
+      -DSVF_SANITIZE="${SVF_SANITIZER}" \
+      -DBUILD_SHARED_LIBS=OFF \
+      -S "${SVFHOME}" -B "${BUILD_DIR}"
+
 cmake --build "${BUILD_DIR}" -j ${jobs}
 
 ########
