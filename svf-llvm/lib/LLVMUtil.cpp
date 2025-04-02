@@ -848,7 +848,7 @@ const unsigned LLVMUtil::getSourceColumn(const Value* val )
         // return argument->getArgNo();
         return getSourceColumnOfFunction(argument->getParent());
     }
-    else if (const GlobalVariable* gvar = SVFUtil::dyn_cast<GlobalVariable>(val))
+    else if (SVFUtil::dyn_cast<GlobalVariable>(val))
     {
         // rawstr << "Glob ";
         // NamedMDNode* CU_Nodes = gvar->getParent()->getNamedMetadata("llvm.dbg.cu");
