@@ -32,7 +32,7 @@ VarArrayObj         0
 VarStructObj        0
 ----------------Time and memory stats--------------------
 LLVMIRTime          0.006
-SVFIRTime           0
+SVFIRTime           0.001
 SymbolTableTime     0
 #######################################################
 
