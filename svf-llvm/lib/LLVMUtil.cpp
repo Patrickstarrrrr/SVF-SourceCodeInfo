@@ -466,7 +466,7 @@ const Value* LLVMUtil::getGlobalRep(const Value* val)
                  {
                      llvm::DIVariable *DIVar = SVFUtil::cast<llvm::DIVariable>(DDI->getVariable());
                     //  llvm::DebugLoc DL = DDI->getDebugLoc();
-                     return DIVar->getFilename().str();
+                     return DIVar->getDirectory().str() + DIVar->getFilename().str();
                  }
              }
          }
@@ -475,7 +475,7 @@ const Value* LLVMUtil::getGlobalRep(const Value* val)
              llvm::DILocation* Loc = SVFUtil::cast<llvm::DILocation>(N);                   // DILocation is in DebugInfo.h
              unsigned Line = Loc->getLine();
             //  unsigned Column = Loc->getColumn();
-             std::string File = Loc->getFilename().str();
+             std::string File = Loc->getDirectory().str() + Loc->getFilename().str();
              //StringRef Dir = Loc.getDirectory();
              if(File.empty() || Line == 0)
              {
@@ -484,7 +484,7 @@ const Value* LLVMUtil::getGlobalRep(const Value* val)
                  {
                      Line = inlineLoc->getLine();
                     //  Column = inlineLoc->getColumn();
-                     File = inlineLoc->getFilename().str();
+                     File = inlineLoc->getDirectory().str() + inlineLoc->getFilename().str();
                  }
              }
              return File;
@@ -521,7 +521,7 @@ const Value* LLVMUtil::getGlobalRep(const Value* val)
                      if(DGV->getName() == gvar->getName())
                      {
                         //  rawstr << "\"ln\": " << DGV->getLine() << ", \"fl\": \"" << DGV->getFilename().str() << "\"";
-                         return DGV->getFilename().str();
+                         return DGV->getDirectory().str() + DGV->getFilename().str();
                      }
  
                  }
@@ -965,7 +965,7 @@ const std::string LLVMUtil::getSourceFileOfFunction(const Function* F)
     if (llvm::DISubprogram *SP =  F->getSubprogram())
     {
         if (SP->describes(F))
-            return SP->getFilename().str();
+            return SP->getDirectory().str() + SP->getFilename().str();
     }
     return "-";
 }
